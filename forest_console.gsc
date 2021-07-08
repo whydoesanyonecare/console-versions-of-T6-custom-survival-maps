@@ -1,4 +1,4 @@
-//forest ps3
+//forest console
 
 #include maps/mp/_utility;
 #include common_scripts/utility;
