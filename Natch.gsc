@@ -1,4 +1,4 @@
-//nacht PS3
+//nacht
 
 #include maps/mp/_utility;
 #include common_scripts/utility;
