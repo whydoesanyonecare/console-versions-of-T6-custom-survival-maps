@@ -1,4 +1,4 @@
-//nacht
+//nacht console
 
 #include maps/mp/_utility;
 #include common_scripts/utility;
@@ -64,7 +64,6 @@
 #include maps/mp/zm_transit;
 init()
 {
-
 	if( getdvar( "mapname" ) == "zm_transit" && getdvar ( "g_gametype")  == "zclassic" )
 	{
 		include_zombie_powerup("death_machine");
@@ -116,7 +115,7 @@ init()
 		level.custom_vending_precaching = ::default_vending_precaching;
 		register_player_damage_callback( ::playerdamagelastcheck );
 		register_zombie_death_event_callback( ::Custom_death_callback );
-
+		level.openeddoor = 0;
 		if(isDefined(level._zombiemode_powerup_grab))
 		{
 			level.original_zombiemode_powerup_grab = level._zombiemode_powerup_grab;
@@ -128,7 +127,7 @@ init()
 		level.perk_purchase_limit = 20;
 		level thread drawZombiesCounter();
 		level thread onPlayerConnect();
-		level thread teleport_zombies();
+		level thread move_spawners();
         level.pers_upgrades_keys = [];
 	    level.pers_upgrades = [];
 	}
@@ -140,6 +139,49 @@ init()
         player iprintln( "^1Error! Please play in Green Run - Tranzit Normal Mode." );
 		setdvar( "ui_errorMessage", "^9Please use Green Run - Tranzit Normal Mode");
 	    setdvar( "ui_errorTitle", "^1Error" );
+	}
+}
+
+move_spawners()
+{
+	flag_wait( "initial_blackscreen_passed" );
+	level.zombie_spawn_locations[0].origin = (13578, -1607, -188);
+	level.zombie_spawn_locations[1].origin = (14013, -569, -188);
+	level.zombie_spawn_locations[2].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[6].origin = (13610, -541, -188);
+	level.zombie_spawn_locations[7].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[8].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[9].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[10].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[11].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[12].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[13].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[14].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[15].origin = (13610, -541, -188);
+	level.zombie_spawn_locations[16].origin = (13594, -1037, -188);
+	level.zombie_spawn_locations[17].origin = (14013, -569, -188);
+	level.zombie_spawn_locations[18].origin = (14013, -569, -188);
+	level.zombie_spawn_locations[19].origin = (14013, -569, -188);
+	level.zombie_spawn_locations[20].origin = (13578, -1607, -188);
+	level.zombie_spawn_locations[21].origin = (13578, -1607, -188);
+	level.zombie_spawn_locations[22].origin = (13578, -1607, -188);
+	level.zombie_spawn_locations[23].origin = (13578, -1607, -188);
+	level.zombie_spawn_locations[24].origin = (13610, -541, -188);
+	while(1)
+	{
+		if(level.openeddoor)
+		{
+			level.zombie_spawn_locations[0].origin = (13238, -828, -217.9);
+			level.zombie_spawn_locations[1].origin = (12207, -16, -197.3);
+			level.zombie_spawn_locations[2].origin = (13321, -382, -202.86);
+			level.zombie_spawn_locations[9].origin = (13213, -993, -216);
+			level.zombie_spawn_locations[12].origin = (13444, 18, -180);
+			level.zombie_spawn_locations[14].origin = (13276, 1030, -211);
+			level.zombie_spawn_locations[6].origin = (13226, 54, -199.4);
+			level.zombie_spawn_locations[23].origin = (13276, 1030, -211);
+			break;
+		}
+		wait 1;
 	}
 }
 
@@ -201,46 +243,6 @@ onPlayerSpawned()
 		{
 			self.score = 2500;
 		}
-	}
-}
-
-teleport_zombies()
-{
-	self endon("disconnect");
-    speed = [];
-	speed[0] = "run";
-	speed[1] = "sprint";
-    teleport = [];
-	teleport[0] = (13226, 54, -199.44);
-	teleport[1] = (13276, 1030, -211);
-	teleport[2] = (13578, -1607, -188);
-	teleport[3] = (14013, -569, -188);
-	for(;;)
-	{	
-		foreach(zombie in getAiArray(level.zombie_team))
-		{
-            if(level.round_number < 5)
-            {
-                if( !(IsDefined( zombie.run_set )) )
-			    {
-				    zombie maps/mp/zombies/_zm_utility::set_zombie_run_cycle( speed[randomintrange(0, 2)] ); 
-			    	zombie.run_set = 1;
-			    }
-            }
-            if(distance( zombie.origin, (10505.8, -663, -186.5195) ) < 2100)
-			{
-				zombie forceteleport(teleport[randomintrange(0, 4)]);
-				zombie thread find_flesh();
-				zombie maps/mp/zombies/_zm_utility::set_zombie_run_cycle( speed[randomintrange(0, 2)] );
-			}
-			if(distance( zombie.origin, (12775.8, -663, -186.5195) ) < 90)
-			{
-				zombie forceteleport(teleport[randomintrange(0, 4)]);
-				zombie thread find_flesh();
-				zombie maps/mp/zombies/_zm_utility::set_zombie_run_cycle( speed[randomintrange(0, 2)] );
-			}
-		}
-		wait 0.3;
 	}
 }
 
@@ -319,21 +321,20 @@ SpawnPoint()
 	player = level.players;
 	if( player[ 0] == self )
 	{
-		player[ 0] setorigin( (13732.2,-715.697,-188.875 ) );
+		player[ 0] setorigin( (13732.2,-675.697,-188.875 ) );
 	}
 	if( player[ 1] == self )
 	{
-		player[ 1] setorigin( (13722.2,-735.697,-188.875) );
+		player[ 1] setorigin( (13702.2,-745.697,-188.875) );
 	}
 	if( player[ 2] == self )
 	{
-		player[ 2] setorigin( (13742.2,-705.697,-188.875 ) );
+		player[ 2] setorigin( (13752.2,-705.697,-188.875 ) );
 	}
 	if( player[ 3] == self )
 	{
-		player[ 3] setorigin( (13702.2,-685.697,-188.875 ) );
+		player[ 3] setorigin( (13692.2,-685.697,-188.875 ) );
 	}
-
 }
 
 init_custom_map()
@@ -844,7 +845,7 @@ soul_box(model)
 	level.soulbox_active = 1;
 	level.soulbox1_active = 1;
 	level.soulbox2_active = 1;
-	level.souls_needed = 30;
+	level.souls_needed = 40;
 	level.soulbox_souls = 0;
 	level.soulbox1_souls = 0;
 	level.soulbox2_souls = 0;
@@ -1539,7 +1540,7 @@ power_up_hud(shader, shader2, text)
 		power_up_hud_icon.hidewheninmenu = true;   
 		power_up_hud_icon setshader( shader, 30, 30);
 		self thread power_up_hud_icon_blink(power_up_hud_icon);
-		self thread destroy_power_up_icon_hud(power_up_hud_icon, 0);
+		self thread destroy_power_up_icon_hud(power_up_hud_icon);
 	}
 	if(shader2)
 	{
@@ -1552,7 +1553,7 @@ power_up_hud(shader, shader2, text)
 		power_up_hud2_icon.hidewheninmenu = true;   
 		power_up_hud2_icon setshader( shader2, 30, 30);
 		self thread power_up_hud_icon_blink(power_up_hud2_icon);
-		self thread destroy_power_up_icon_hud(0, power_up_hud2_icon);
+		self thread destroy_power_up_icon_hud2(power_up_hud2_icon);
 	}
 }
 
@@ -1594,19 +1595,18 @@ power_up_hud_icon_blink(elem)
 	}
 }
 
-destroy_power_up_icon_hud(elem, elem2)
+destroy_power_up_icon_hud(elem)
 {
 	level endon("game_ended");
-	if (s_powerup.powerup_name == "unlimited_ammo")
-	{
-		self waittill_any_timeout( "disconnect", "end_unlimited_ammo");
-		elem destroy();
-	}
-	if (s_powerup.powerup_name == "death_machine")
-	{
-		self waittill_any_timeout( "disconnect", "Death_Machine_Stop");
-		elem2 destroy();
-	}
+	self waittill_any_timeout( "disconnect", "end_unlimited_ammo");
+	elem destroy();
+}
+
+destroy_power_up_icon_hud2(elem2)
+{
+    level endon("game_ended");
+	self waittill_any_timeout( "disconnect", "Death_Machine_Stop");
+	elem2 destroy();
 }
 
 endammo()
@@ -1660,7 +1660,6 @@ OnGameEndedHint( player )
 	hud.archived = false;
 	hud.foreground = true;
 }
-
 
 //--------BOX-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1828,18 +1827,11 @@ flame_boss()
 	self endon("death");
 	self endon("boss_dead");
 	level endon("end_of_round");
-    spawn = [];
-    spawn[0] = (13416.19, -22.76, -187.2374);
-    spawn[1] = (13128, -999, -210);
-    spawn[2] = (13766, -1550, -167);
-    spawn[3] = (13762, -497, -188);
 	spawner = random( level.zombie_spawners );
 	inferno = spawn_zombie( spawner );
 	level.boss_is_alive = 1;
 	level.zombie_health = level.zombie_vars["zombie_health_start"];  
 	level.zombie_health = 20000;
-	inferno forceteleport(spawn[randomintrange(0, 4)]);
-	inferno.start_inert = 1;
 	inferno.ignore_nuke = 1;
 	inferno.ignore_enemyoverride = 1;
 	inferno setmodel("c_zom_avagadro_fb");
