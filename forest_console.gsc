@@ -133,12 +133,14 @@ init()
 		level.player_out_of_playable_area_monitor = 0;
 		level.perk_purchase_limit = 20;
 		level thread move_spawn_locations();
-		level thread stopbus(); 
 		level thread drawZombiesCounter();
 		level thread onPlayerConnect();
 		level thread custom_round_monitor();
+		level thread zombie_speed();
 		level.pers_upgrades_keys = [];
 	    level.pers_upgrades = [];
+		flag_wait( "start_zombie_round_logic" );
+		level thread maps/mp/zm_transit::delete_bus_pieces();
 	}
 	else
 	{
@@ -220,28 +222,23 @@ onPlayerSpawned()
 	}
 }
 
-stopbus()
+zombie_speed()
 {
-	flag_wait( "initial_blackscreen_passed" );
-	level endon("end_game");
-	while( 1 )
+	speed = [];
+	speed[0] = "run";
+	speed[1] = "sprint";
+	while( level.round_number < 3 )
 	{
-		bus = getent( "the_bus", "targetname" );
-		if( IsDefined( level.the_bus.ismoving ) && IsDefined( bus ) )
+		foreach(zombie in getaiarray(level.zombie_team))
 		{
-			bus.disabled_by_emp = 1;
-			bus notify( "power_off" );
-			bus.pre_disabled_by_emp = 1;
-			bus notify( "pre_power_off" );
-			bus.ismoving = 0;
-			bus.isstopping = 0;
-			bus.exceed_chase_speed = 0;
-			bus notify( "stopping" );
-			bus.targetspeed = 0;
+			if( !(IsDefined( zombie.run_set )) )
+			{
+				zombie maps/mp/zombies/_zm_utility::set_zombie_run_cycle( speed[randomintrange(0, 2)] ); 
+				zombie.run_set = 1;
+			}
 		}
-		wait 2;
+		wait 1;
 	}
-
 }
 
 drawZombiesCounter()
@@ -860,8 +857,8 @@ custom_round_monitor()
 					{
 						zombie setModel( "c_zom_screecher_fb" );
 						zombie maps/mp/zombies/_zm_utility::set_zombie_run_cycle( "super_sprint" ); 
-                        zombie thread kill_crawler();
 						zombie thread last_zombie();
+						zombie.remodeled = 1;
 					}
 				}
 				wait 0.05;
@@ -874,25 +871,22 @@ custom_round_monitor()
 
 last_zombie()
 {
-	self waittill( "death" );
-	if ( get_current_zombie_count() == 0 && level.zombie_total == 0 )
-	{
-		level.last_zombie_origin = self.origin;
-	}
-	clear_all_corpses();
-}
-
-kill_crawler()
-{
-	wait 5;
+	wait 4;
 	while(isalive( self ))
 	{
 		if(!self.has_legs)
 		{
 			self doDamage(self.health + 666, (0, 0, 0));
+			break;
 		}
-		wait 0.5;
+		wait 1;
 	}
+	wait 0.1;
+	if ( get_current_zombie_count() == 0 && level.zombie_total == 0 )
+	{
+		level.last_zombie_origin = self.origin;
+	}
+	clear_all_corpses();
 }
 
 souls(box)
