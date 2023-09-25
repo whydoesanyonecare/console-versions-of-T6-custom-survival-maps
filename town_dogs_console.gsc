@@ -1130,11 +1130,11 @@ wallweaponmonitor( weapon, cost, ammo )
                    	 	wait 3;
 			       	 	self.in_use_weap = 0;
 					}
-					if( player usebuttonpressed() && (player hasWeapon(weapon)) && weapon != "riotshield_zm" && weapon != "claymore_zm" && weapon != "emp_grenade_zm" && !(self.in_use_weap) && player.score >= ammocost && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand())
+					if( player usebuttonpressed() && (player hasWeapon(weapon)) && weapon != "riotshield_zm" && weapon != "claymore_zm" && weapon != "emp_grenade_zm" && !(self.in_use_weap) && player.score >= ammo && !player maps/mp/zombies/_zm_laststand::player_is_in_laststand())
 					{
 						player playsound( "zmb_cha_ching" );
 						self.in_use_weap = 1;
-						player.score -= ammocost;
+						player.score -= ammo;
 						player setweaponammoclip(weapon, 150);
 						player setWeaponAmmostock(weapon, 900 );
 						player iprintln( "^2" + ( weap + " Ammo Buy" ) );
